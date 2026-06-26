@@ -1,7 +1,7 @@
 import { motion, useInView, useMotionValue, useSpring } from 'framer-motion';
-import { Sparkles, Zap, Shield, TrendingUp, Users } from 'lucide-react';
+import { Sparkles, Zap, Shield, TrendingUp, Users, BarChart3, LineChart, PieChart, AreaChart } from 'lucide-react';
 import AnimatedButton from './AnimatedButton';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const AnimatedCounter = ({ value, suffix = '', decimals = 0 }: { value: number; suffix?: string; decimals?: number }) => {
   const ref = useRef<HTMLSpanElement>(null);
@@ -24,6 +24,205 @@ const AnimatedCounter = ({ value, suffix = '', decimals = 0 }: { value: number; 
   }, [springValue, decimals, suffix]);
 
   return <span ref={ref}>0{suffix}</span>;
+};
+
+const DataVisualization = () => {
+  const [selectedChart, setSelectedChart] = useState<'line' | 'bar' | 'pie' | 'area'>('line');
+
+  const chartTypes = [
+    { id: 'line' as const, name: 'Line Chart', icon: <LineChart size={20} /> },
+    { id: 'bar' as const, name: 'Bar Chart', icon: <BarChart3 size={20} /> },
+    { id: 'pie' as const, name: 'Pie Chart', icon: <PieChart size={20} /> },
+    { id: 'area' as const, name: 'Area Chart', icon: <AreaChart size={20} /> },
+  ];
+
+  // Sample data points
+  const dataPoints = [65, 78, 85, 72, 90, 88, 95, 82, 88, 92, 87, 94];
+
+  return (
+    <div className="flex gap-4 h-full">
+      {/* Left Sidebar */}
+      <div className="w-48 bg-nocturnal-expedition/10 backdrop-blur-sm rounded-2xl p-4 border-2 border-nocturnal-expedition/20">
+        <h3 className="text-sm font-mono font-bold text-oceanic-noir mb-4 uppercase tracking-wider">Chart Type</h3>
+        <div className="space-y-2">
+          {chartTypes.map((chart) => (
+            <button
+              key={chart.id}
+              onClick={() => setSelectedChart(chart.id)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
+                selectedChart === chart.id
+                  ? 'bg-gradient-to-r from-forsythia to-deep-saffron text-oceanic-noir shadow-lg'
+                  : 'bg-arctic-powder/50 text-oceanic-noir/70 hover:bg-mystic-mint hover:text-oceanic-noir'
+              }`}
+            >
+              {chart.icon}
+              <span className="font-sans">{chart.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Chart Display Area */}
+      <div className="flex-1 bg-gradient-to-br from-oceanic-noir to-nocturnal-expedition rounded-2xl p-8 relative overflow-hidden">
+        {/* Grid Background */}
+        <div className="absolute inset-0 opacity-10">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={`h-${i}`} className="absolute w-full h-px bg-mystic-mint" style={{ top: `${(i + 1) * 8.33}%` }} />
+          ))}
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={`v-${i}`} className="absolute h-full w-px bg-mystic-mint" style={{ left: `${(i + 1) * 8.33}%` }} />
+          ))}
+        </div>
+
+        {/* Chart Content */}
+        <div className="relative z-10 h-full flex flex-col">
+          <div className="mb-6">
+            <h3 className="text-arctic-powder font-mono font-bold text-xl mb-1">Data Analytics Dashboard</h3>
+            <p className="text-mystic-mint/70 text-sm font-sans">Real-time performance metrics</p>
+          </div>
+
+          <div className="flex-1 flex items-end justify-between gap-2 px-4">
+            {selectedChart === 'line' && (
+              <svg className="w-full h-full" viewBox="0 0 600 300" preserveAspectRatio="none">
+                <motion.path
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 2, ease: "easeInOut" }}
+                  d={`M ${dataPoints.map((val, i) => `${i * 55},${300 - val * 2.5}`).join(' L ')}`}
+                  fill="none"
+                  stroke="url(#lineGradient)"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                />
+                <motion.path
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 2, ease: "easeInOut" }}
+                  d={`M ${dataPoints.map((val, i) => `${i * 55},${300 - val * 2.5}`).join(' L ')} L 660,300 L 0,300 Z`}
+                  fill="url(#areaGradient)"
+                  opacity="0.3"
+                />
+                <defs>
+                  <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#FFC801" />
+                    <stop offset="50%" stopColor="#FF9932" />
+                    <stop offset="100%" stopColor="#114C5A" />
+                  </linearGradient>
+                  <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#FFC801" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#FFC801" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            )}
+
+            {selectedChart === 'bar' && dataPoints.map((val, i) => (
+              <motion.div
+                key={i}
+                initial={{ height: 0 }}
+                animate={{ height: `${val}%` }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                className="flex-1 bg-gradient-to-t from-forsythia via-deep-saffron to-nocturnal-expedition rounded-t-lg relative group"
+              >
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-oceanic-noir/90 px-2 py-1 rounded text-xs text-arctic-powder font-mono">
+                  {val}%
+                </div>
+              </motion.div>
+            ))}
+
+            {selectedChart === 'pie' && (
+              <div className="w-full h-full flex items-center justify-center">
+                <svg width="280" height="280" viewBox="0 0 280 280">
+                  <motion.circle
+                    initial={{ strokeDasharray: "0 1000" }}
+                    animate={{ strokeDasharray: "314 1000" }}
+                    transition={{ duration: 1.5 }}
+                    cx="140"
+                    cy="140"
+                    r="100"
+                    fill="none"
+                    stroke="#FFC801"
+                    strokeWidth="80"
+                  />
+                  <motion.circle
+                    initial={{ strokeDasharray: "0 1000", rotate: 0 }}
+                    animate={{ strokeDasharray: "251 1000", rotate: 114 }}
+                    transition={{ duration: 1.5, delay: 0.2 }}
+                    cx="140"
+                    cy="140"
+                    r="100"
+                    fill="none"
+                    stroke="#FF9932"
+                    strokeWidth="80"
+                    transform="rotate(114 140 140)"
+                  />
+                  <motion.circle
+                    initial={{ strokeDasharray: "0 1000" }}
+                    animate={{ strokeDasharray: "188 1000" }}
+                    transition={{ duration: 1.5, delay: 0.4 }}
+                    cx="140"
+                    cy="140"
+                    r="100"
+                    fill="none"
+                    stroke="#114C5A"
+                    strokeWidth="80"
+                    transform="rotate(245 140 140)"
+                  />
+                  <circle cx="140" cy="140" r="60" fill="#172B36" />
+                  <text x="140" y="145" textAnchor="middle" fill="#F1F6F4" fontSize="24" fontWeight="bold" fontFamily="monospace">
+                    100%
+                  </text>
+                </svg>
+              </div>
+            )}
+
+            {selectedChart === 'area' && (
+              <svg className="w-full h-full" viewBox="0 0 600 300" preserveAspectRatio="none">
+                <motion.path
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 2, ease: "easeInOut" }}
+                  d={`M 0,300 L ${dataPoints.map((val, i) => `${i * 55},${300 - val * 2.5}`).join(' L ')} L 660,300 Z`}
+                  fill="url(#areaFillGradient)"
+                />
+                <motion.path
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 2, ease: "easeInOut" }}
+                  d={`M ${dataPoints.map((val, i) => `${i * 55},${300 - val * 2.5}`).join(' L ')}`}
+                  fill="none"
+                  stroke="#FFC801"
+                  strokeWidth="3"
+                />
+                <defs>
+                  <linearGradient id="areaFillGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#FF9932" stopOpacity="0.6" />
+                    <stop offset="100%" stopColor="#114C5A" stopOpacity="0.2" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            )}
+          </div>
+
+          {/* Legend */}
+          <div className="mt-6 flex items-center justify-center gap-6 text-xs font-sans">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-forsythia" />
+              <span className="text-mystic-mint">Revenue</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-deep-saffron" />
+              <span className="text-mystic-mint">Growth</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-nocturnal-expedition" />
+              <span className="text-mystic-mint">Target</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const Hero = () => {
@@ -111,30 +310,10 @@ const Hero = () => {
         initial={{ opacity: 0, y: 100 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
-        className="mt-24 w-full max-w-6xl rounded-3xl border-4 border-nocturnal-expedition/20 shadow-2xl overflow-hidden bg-oceanic-noir/95 backdrop-blur-sm p-2"
+        className="mt-24 w-full max-w-6xl rounded-3xl border-4 border-nocturnal-expedition/20 shadow-2xl overflow-hidden bg-arctic-powder/80 backdrop-blur-sm p-6"
       >
-        <div className="aspect-[16/9] bg-gradient-to-br from-oceanic-noir to-nocturnal-expedition rounded-2xl flex items-center justify-center relative overflow-hidden">
-          {/* Code Animation Background */}
-          <div className="text-mystic-mint/20 font-mono text-xs overflow-hidden absolute inset-0 p-6 opacity-40 select-none">
-            {Array.from({ length: 25 }).map((_, i) => (
-              <div key={i} className="whitespace-nowrap mb-1 animate-pulse" style={{ animationDelay: `${i * 0.1}s` }}>
-                {`> pipeline_${i}.execute() → [SUCCESS] processed ${Math.floor(Math.random() * 10000)} records | latency: ${Math.floor(Math.random() * 100)}ms`}
-              </div>
-            ))}
-          </div>
-          
-          {/* Center Content */}
-          <div className="relative z-10 flex flex-col items-center">
-             <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-forsythia to-deep-saffron flex items-center justify-center shadow-[0_0_60px_rgba(255,200,1,0.6)]">
-                <div className="w-16 h-16 border-4 border-arctic-powder border-t-transparent rounded-full animate-spin" />
-             </div>
-             <p className="mt-8 font-mono text-arctic-powder font-bold text-xl">Processing Real-Time Data...</p>
-             <div className="mt-4 flex gap-2">
-               <div className="w-3 h-3 bg-forsythia rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
-               <div className="w-3 h-3 bg-deep-saffron rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-               <div className="w-3 h-3 bg-mystic-mint rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
-             </div>
-          </div>
+        <div className="aspect-[16/9]">
+          <DataVisualization />
         </div>
       </motion.div>
     </section>
