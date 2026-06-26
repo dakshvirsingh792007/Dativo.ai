@@ -12,7 +12,7 @@ const Navbar = () => {
     <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-5xl px-4">
       <div className="glass-pill px-10 py-5 flex items-center justify-between">
         <div className="text-nocturnal-expedition font-mono font-bold text-2xl tracking-tighter">
-          DATA.AI
+          DATIVO.AI
         </div>
         <ul className="hidden md:flex items-center gap-10">
           {navLinks.map((link) => (

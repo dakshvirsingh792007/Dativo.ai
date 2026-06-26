@@ -46,7 +46,7 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-2">
             <div className="text-arctic-powder font-mono font-bold text-3xl tracking-tighter mb-6 flex items-center gap-2">
               <div className="w-10 h-10 bg-gradient-to-br from-forsythia to-deep-saffron rounded-xl" />
-              DATA.AI
+              DATIVO.AI
             </div>
             <p className="text-arctic-powder/70 font-sans text-sm leading-relaxed mb-8 max-w-sm">
               The next generation of AI-powered data automation. Built for developers, trusted by enterprises worldwide.
@@ -103,7 +103,7 @@ const Footer = () => {
         
         <div className="pt-10 border-t border-arctic-powder/10 flex flex-col md:flex-row items-center justify-between gap-6">
           <p className="text-xs text-arctic-powder/50 font-mono">
-            © 2024 DATA.AI Systems Inc. All rights reserved.
+            © 2024 DATIVO.AI Systems Inc. All rights reserved.
           </p>
           <div className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-mystic-mint/10 border border-mystic-mint/20 text-[10px] font-mono uppercase tracking-widest text-arctic-powder/70">
              <div className="w-2.5 h-2.5 rounded-full bg-forsythia animate-pulse shadow-lg shadow-forsythia/50" />
