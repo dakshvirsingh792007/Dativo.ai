@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,11 +6,15 @@
 
 @layer base {
   body {
-    @apply bg-arctic-powder text-oceanic-noir font-sans;
+    @apply bg-arctic-powder text-oceanic-noir font-sans antialiased;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-mono;
+  }
+
+  * {
+    @apply scroll-smooth;
   }
 }
 
@@ -20,6 +24,12 @@
   }
   
   .glass-pill {
-    @apply backdrop-blur-md bg-white/30 border border-white/20 rounded-full shadow-lg;
+    @apply backdrop-blur-md bg-arctic-powder/80 border-2 border-mystic-mint/30 rounded-full shadow-xl;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-forsythia via-deep-saffron to-nocturnal-expedition bg-clip-text text-transparent;
   }
 }
