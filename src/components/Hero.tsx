@@ -1,6 +1,30 @@
-import { motion } from 'framer-motion';
-import { Sparkles, Zap, Shield, TrendingUp } from 'lucide-react';
+import { motion, useInView, useMotionValue, useSpring } from 'framer-motion';
+import { Sparkles, Zap, Shield, TrendingUp, Users } from 'lucide-react';
 import AnimatedButton from './AnimatedButton';
+import { useEffect, useRef } from 'react';
+
+const AnimatedCounter = ({ value, suffix = '', decimals = 0 }: { value: number; suffix?: string; decimals?: number }) => {
+  const ref = useRef<HTMLSpanElement>(null);
+  const motionValue = useMotionValue(0);
+  const springValue = useSpring(motionValue, { duration: 2000, bounce: 0 });
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  useEffect(() => {
+    if (isInView) {
+      motionValue.set(value);
+    }
+  }, [isInView, motionValue, value]);
+
+  useEffect(() => {
+    springValue.on("change", (latest) => {
+      if (ref.current) {
+        ref.current.textContent = latest.toFixed(decimals) + suffix;
+      }
+    });
+  }, [springValue, decimals, suffix]);
+
+  return <span ref={ref}>0{suffix}</span>;
+};
 
 const Hero = () => {
   return (
@@ -55,20 +79,26 @@ const Hero = () => {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.8 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto"
         >
           {[
-            { icon: <Zap className="text-forsythia" size={32} />, value: '10M+', label: 'Events/Second' },
-            { icon: <Shield className="text-deep-saffron" size={32} />, value: '99.99%', label: 'Uptime SLA' },
-            { icon: <TrendingUp className="text-nocturnal-expedition" size={32} />, value: '200+', label: 'Integrations' },
+            { icon: <Zap className="text-forsythia" size={32} />, value: 10, suffix: 'M+', label: 'Events/Second', decimals: 0 },
+            { icon: <Shield className="text-deep-saffron" size={32} />, value: 99.99, suffix: '%', label: 'Uptime SLA', decimals: 2 },
+            { icon: <TrendingUp className="text-nocturnal-expedition" size={32} />, value: 200, suffix: '+', label: 'Integrations', decimals: 0 },
+            { icon: <Users className="text-oceanic-noir" size={32} />, value: 50, suffix: 'K+', label: 'Active Users', decimals: 0 },
           ].map((stat, index) => (
             <motion.div
               key={index}
-              whileHover={{ y: -5 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 + index * 0.1, duration: 0.5 }}
+              whileHover={{ y: -5, scale: 1.02 }}
               className="bg-arctic-powder/80 backdrop-blur-md border-2 border-mystic-mint rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <div className="mb-4 flex justify-center">{stat.icon}</div>
-              <div className="text-4xl font-bold text-oceanic-noir mb-2">{stat.value}</div>
+              <div className="text-4xl font-bold text-oceanic-noir mb-2">
+                <AnimatedCounter value={stat.value} suffix={stat.suffix} decimals={stat.decimals} />
+              </div>
               <div className="text-sm text-oceanic-noir/60 font-medium">{stat.label}</div>
             </motion.div>
           ))}
