@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
+import AnimatedButton from './AnimatedButton';
 
 const Hero = () => {
   return (
@@ -28,13 +29,7 @@ const Hero = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="btn-primary flex items-center gap-2"
-          >
-            Get Started Free <ArrowRight size={20} />
-          </motion.button>
+          <AnimatedButton />
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
