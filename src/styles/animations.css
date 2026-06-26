@@ -195,6 +195,10 @@
   animation: growBar 0.5s ease-out forwards;
 }
 
+.chart-pie {
+  animation: drawPie 0.8s ease-out forwards;
+}
+
 /* Loader Animation */
 @keyframes spin {
   to {

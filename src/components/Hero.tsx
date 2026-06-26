@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef, useState, useCallback } from 'react';
-import { Sparkles, Zap, Shield, TrendingUp, Users, BarChart3, LineChart, PieChart, AreaChart } from 'lucide-react';
+import { Sparkles, Zap, Shield, TrendingUp, Users, BarChart3, LineChart, AreaChart } from 'lucide-react';
 import AnimatedButton from './AnimatedButton';
 import '../styles/animations.css';
 
@@ -94,12 +94,11 @@ StatsCard.displayName = 'StatsCard';
  * Data Visualization Component - No Framer Motion
  */
 const DataVisualization = memo(() => {
-  const [selectedChart, setSelectedChart] = useState<'line' | 'bar' | 'pie' | 'area'>('line');
+  const [selectedChart, setSelectedChart] = useState<'line' | 'bar' | 'area'>('line');
 
   const chartTypes = [
     { id: 'line' as const, name: 'Line Chart', icon: <LineChart size={20} /> },
     { id: 'bar' as const, name: 'Bar Chart', icon: <BarChart3 size={20} /> },
-    { id: 'pie' as const, name: 'Pie Chart', icon: <PieChart size={20} /> },
     { id: 'area' as const, name: 'Area Chart', icon: <AreaChart size={20} /> },
   ];
 
@@ -197,56 +196,7 @@ const DataVisualization = memo(() => {
               </div>
             ))}
 
-            {selectedChart === 'pie' && (
-              <div className="w-full h-full flex items-center justify-center">
-                <svg width="280" height="280" viewBox="0 0 280 280">
-                  {/* First segment - 50% (Forsythia) */}
-                  <circle
-                    cx="140"
-                    cy="140"
-                    r="100"
-                    fill="none"
-                    stroke="#FFC801"
-                    strokeWidth="80"
-                    strokeDasharray="314 628"
-                    transform="rotate(-90 140 140)"
-                    className="chart-bar"
-                    style={{ animationDelay: '0s' }}
-                  />
-                  {/* Second segment - 30% (Deep Saffron) */}
-                  <circle
-                    cx="140"
-                    cy="140"
-                    r="100"
-                    fill="none"
-                    stroke="#FF9932"
-                    strokeWidth="80"
-                    strokeDasharray="188 628"
-                    transform="rotate(90 140 140)"
-                    className="chart-bar"
-                    style={{ animationDelay: '0.2s' }}
-                  />
-                  {/* Third segment - 20% (Nocturnal Expedition) */}
-                  <circle
-                    cx="140"
-                    cy="140"
-                    r="100"
-                    fill="none"
-                    stroke="#114C5A"
-                    strokeWidth="80"
-                    strokeDasharray="125 628"
-                    transform="rotate(198 140 140)"
-                    className="chart-bar"
-                    style={{ animationDelay: '0.4s' }}
-                  />
-                  {/* Center circle with text */}
-                  <circle cx="140" cy="140" r="60" fill="#172B36" />
-                  <text x="140" y="150" textAnchor="middle" fill="#F1F6F4" fontSize="28" fontWeight="bold" fontFamily="monospace">
-                    100%
-                  </text>
-                </svg>
-              </div>
-            )}
+
 
             {selectedChart === 'area' && (
               <svg className="w-full h-full" viewBox="0 0 600 300" preserveAspectRatio="none">
