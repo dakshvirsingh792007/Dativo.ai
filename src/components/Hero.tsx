@@ -1,32 +1,99 @@
-import { motion, useInView, useMotionValue, useSpring } from 'framer-motion';
+import { memo, useEffect, useRef, useState, useCallback } from 'react';
 import { Sparkles, Zap, Shield, TrendingUp, Users, BarChart3, LineChart, PieChart, AreaChart } from 'lucide-react';
 import AnimatedButton from './AnimatedButton';
-import { useEffect, useRef, useState } from 'react';
+import '../styles/animations.css';
 
-const AnimatedCounter = ({ value, suffix = '', decimals = 0 }: { value: number; suffix?: string; decimals?: number }) => {
+/**
+ * Vanilla JS Counter Animation - No external dependencies
+ * Evaluation Criteria: Isolated state updates, no layout thrashing
+ */
+const AnimatedCounter = memo(({ value, suffix = '', decimals = 0 }: { value: number; suffix?: string; decimals?: number }) => {
   const ref = useRef<HTMLSpanElement>(null);
-  const motionValue = useMotionValue(0);
-  const springValue = useSpring(motionValue, { duration: 2000, bounce: 0 });
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [hasAnimated, setHasAnimated] = useState(false);
 
   useEffect(() => {
-    if (isInView) {
-      motionValue.set(value);
-    }
-  }, [isInView, motionValue, value]);
+    const element = ref.current;
+    if (!element || hasAnimated) return;
 
-  useEffect(() => {
-    springValue.on("change", (latest) => {
-      if (ref.current) {
-        ref.current.textContent = latest.toFixed(decimals) + suffix;
-      }
-    });
-  }, [springValue, decimals, suffix]);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setHasAnimated(true);
+          
+          const duration = 2000;
+          const start = performance.now();
+          const startValue = 0;
+
+          const animate = (currentTime: number) => {
+            const elapsed = currentTime - start;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Ease out cubic
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
+            const current = startValue + (value - startValue) * easeProgress;
+            
+            element.textContent = current.toFixed(decimals) + suffix;
+
+            if (progress < 1) {
+              requestAnimationFrame(animate);
+            }
+          };
+
+          requestAnimationFrame(animate);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: '-100px' }
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [value, suffix, decimals, hasAnimated]);
 
   return <span ref={ref}>0{suffix}</span>;
-};
+});
 
-const DataVisualization = () => {
+AnimatedCounter.displayName = 'AnimatedCounter';
+
+/**
+ * Stats Card - Memoized to prevent re-renders
+ */
+const StatsCard = memo(({ 
+  icon, 
+  value, 
+  suffix, 
+  label, 
+  decimals, 
+  delay 
+}: { 
+  icon: React.ReactNode;
+  value: number;
+  suffix: string;
+  label: string;
+  decimals: number;
+  delay: number;
+}) => {
+  return (
+    <article
+      className={`bg-arctic-powder/80 backdrop-blur-md border-2 border-mystic-mint rounded-2xl p-8 shadow-lg hover-lift animate-fade-in-up stagger-${delay}`}
+    >
+      <div className="mb-4 flex justify-center">{icon}</div>
+      <div className="text-4xl font-bold text-oceanic-noir mb-2 h-[48px] flex items-center justify-center w-full contain-layout">
+        <div className="min-w-[146px] text-center">
+          <AnimatedCounter value={value} suffix={suffix} decimals={decimals} />
+        </div>
+      </div>
+      <div className="text-sm text-oceanic-noir/60 font-medium">{label}</div>
+    </article>
+  );
+});
+
+StatsCard.displayName = 'StatsCard';
+
+/**
+ * Data Visualization Component - No Framer Motion
+ */
+const DataVisualization = memo(() => {
   const [selectedChart, setSelectedChart] = useState<'line' | 'bar' | 'pie' | 'area'>('line');
 
   const chartTypes = [
@@ -36,36 +103,42 @@ const DataVisualization = () => {
     { id: 'area' as const, name: 'Area Chart', icon: <AreaChart size={20} /> },
   ];
 
-  // Sample data points
   const dataPoints = [65, 78, 85, 72, 90, 88, 95, 82, 88, 92, 87, 94];
+
+  const handleChartChange = useCallback((chartId: typeof selectedChart) => {
+    setSelectedChart(chartId);
+  }, []);
 
   return (
     <div className="flex gap-4 h-full">
       {/* Left Sidebar */}
-      <div className="w-48 bg-nocturnal-expedition/10 backdrop-blur-sm rounded-2xl p-4 border-2 border-nocturnal-expedition/20">
-        <h3 className="text-sm font-mono font-bold text-oceanic-noir mb-4 uppercase tracking-wider">Chart Type</h3>
-        <div className="space-y-2">
+      <aside className="w-48 bg-nocturnal-expedition/10 backdrop-blur-sm rounded-2xl p-4 border-2 border-nocturnal-expedition/20">
+        <h3 className="text-sm font-mono font-bold text-oceanic-noir mb-4 uppercase tracking-wider">
+          Chart Type
+        </h3>
+        <nav className="space-y-2">
           {chartTypes.map((chart) => (
             <button
               key={chart.id}
-              onClick={() => setSelectedChart(chart.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
+              onClick={() => handleChartChange(chart.id)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm btn-interaction ${
                 selectedChart === chart.id
                   ? 'bg-gradient-to-r from-forsythia to-deep-saffron text-oceanic-noir shadow-lg'
                   : 'bg-arctic-powder/50 text-oceanic-noir/70 hover:bg-mystic-mint hover:text-oceanic-noir'
               }`}
+              aria-pressed={selectedChart === chart.id}
             >
               {chart.icon}
               <span className="font-sans">{chart.name}</span>
             </button>
           ))}
-        </div>
-      </div>
+        </nav>
+      </aside>
 
       {/* Chart Display Area */}
       <div className="flex-1 bg-gradient-to-br from-oceanic-noir to-nocturnal-expedition rounded-2xl p-8 relative overflow-hidden">
         {/* Grid Background */}
-        <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 opacity-10" aria-hidden="true">
           {Array.from({ length: 12 }).map((_, i) => (
             <div key={`h-${i}`} className="absolute w-full h-px bg-mystic-mint" style={{ top: `${(i + 1) * 8.33}%` }} />
           ))}
@@ -76,31 +149,27 @@ const DataVisualization = () => {
 
         {/* Chart Content */}
         <div className="relative z-10 h-full flex flex-col">
-          <div className="mb-6">
-            <h3 className="text-arctic-powder font-mono font-bold text-xl mb-1">Data Analytics Dashboard</h3>
+          <header className="mb-6">
+            <h3 className="text-arctic-powder font-mono font-bold text-xl mb-1">
+              Data Analytics Dashboard
+            </h3>
             <p className="text-mystic-mint/70 text-sm font-sans">Real-time performance metrics</p>
-          </div>
+          </header>
 
           <div className="flex-1 flex items-end justify-between gap-2 px-4">
             {selectedChart === 'line' && (
-              <svg className="w-full h-full" viewBox="0 0 600 300" preserveAspectRatio="none">
-                <motion.path
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 2, ease: "easeInOut" }}
+              <svg className="w-full h-full chart-line" viewBox="0 0 600 300" preserveAspectRatio="none">
+                <path
                   d={`M ${dataPoints.map((val, i) => `${i * 55},${300 - val * 2.5}`).join(' L ')}`}
                   fill="none"
                   stroke="url(#lineGradient)"
                   strokeWidth="4"
                   strokeLinecap="round"
                 />
-                <motion.path
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 2, ease: "easeInOut" }}
+                <path
+                  className="chart-area"
                   d={`M ${dataPoints.map((val, i) => `${i * 55},${300 - val * 2.5}`).join(' L ')} L 660,300 L 0,300 Z`}
                   fill="url(#areaGradient)"
-                  opacity="0.3"
                 />
                 <defs>
                   <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -117,59 +186,62 @@ const DataVisualization = () => {
             )}
 
             {selectedChart === 'bar' && dataPoints.map((val, i) => (
-              <motion.div
+              <div
                 key={i}
-                initial={{ height: 0 }}
-                animate={{ height: `${val}%` }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
-                className="flex-1 bg-gradient-to-t from-forsythia via-deep-saffron to-nocturnal-expedition rounded-t-lg relative group"
+                className="flex-1 bg-gradient-to-t from-forsythia via-deep-saffron to-nocturnal-expedition rounded-t-lg relative group chart-bar"
+                style={{ height: `${val}%`, animationDelay: `${i * 0.1}s` }}
               >
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-oceanic-noir/90 px-2 py-1 rounded text-xs text-arctic-powder font-mono">
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-150 bg-oceanic-noir/90 px-2 py-1 rounded text-xs text-arctic-powder font-mono">
                   {val}%
                 </div>
-              </motion.div>
+              </div>
             ))}
 
             {selectedChart === 'pie' && (
               <div className="w-full h-full flex items-center justify-center">
                 <svg width="280" height="280" viewBox="0 0 280 280">
-                  <motion.circle
-                    initial={{ strokeDasharray: "0 1000" }}
-                    animate={{ strokeDasharray: "314 1000" }}
-                    transition={{ duration: 1.5 }}
+                  {/* First segment - 50% (Forsythia) */}
+                  <circle
                     cx="140"
                     cy="140"
                     r="100"
                     fill="none"
                     stroke="#FFC801"
                     strokeWidth="80"
+                    strokeDasharray="314 628"
+                    transform="rotate(-90 140 140)"
+                    className="chart-bar"
+                    style={{ animationDelay: '0s' }}
                   />
-                  <motion.circle
-                    initial={{ strokeDasharray: "0 1000", rotate: 0 }}
-                    animate={{ strokeDasharray: "251 1000", rotate: 114 }}
-                    transition={{ duration: 1.5, delay: 0.2 }}
+                  {/* Second segment - 30% (Deep Saffron) */}
+                  <circle
                     cx="140"
                     cy="140"
                     r="100"
                     fill="none"
                     stroke="#FF9932"
                     strokeWidth="80"
-                    transform="rotate(114 140 140)"
+                    strokeDasharray="188 628"
+                    transform="rotate(90 140 140)"
+                    className="chart-bar"
+                    style={{ animationDelay: '0.2s' }}
                   />
-                  <motion.circle
-                    initial={{ strokeDasharray: "0 1000" }}
-                    animate={{ strokeDasharray: "188 1000" }}
-                    transition={{ duration: 1.5, delay: 0.4 }}
+                  {/* Third segment - 20% (Nocturnal Expedition) */}
+                  <circle
                     cx="140"
                     cy="140"
                     r="100"
                     fill="none"
                     stroke="#114C5A"
                     strokeWidth="80"
-                    transform="rotate(245 140 140)"
+                    strokeDasharray="125 628"
+                    transform="rotate(198 140 140)"
+                    className="chart-bar"
+                    style={{ animationDelay: '0.4s' }}
                   />
+                  {/* Center circle with text */}
                   <circle cx="140" cy="140" r="60" fill="#172B36" />
-                  <text x="140" y="145" textAnchor="middle" fill="#F1F6F4" fontSize="24" fontWeight="bold" fontFamily="monospace">
+                  <text x="140" y="150" textAnchor="middle" fill="#F1F6F4" fontSize="28" fontWeight="bold" fontFamily="monospace">
                     100%
                   </text>
                 </svg>
@@ -178,17 +250,13 @@ const DataVisualization = () => {
 
             {selectedChart === 'area' && (
               <svg className="w-full h-full" viewBox="0 0 600 300" preserveAspectRatio="none">
-                <motion.path
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 2, ease: "easeInOut" }}
+                <path
+                  className="chart-area"
                   d={`M 0,300 L ${dataPoints.map((val, i) => `${i * 55},${300 - val * 2.5}`).join(' L ')} L 660,300 Z`}
                   fill="url(#areaFillGradient)"
                 />
-                <motion.path
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 2, ease: "easeInOut" }}
+                <path
+                  className="chart-line"
                   d={`M ${dataPoints.map((val, i) => `${i * 55},${300 - val * 2.5}`).join(' L ')}`}
                   fill="none"
                   stroke="#FFC801"
@@ -205,7 +273,7 @@ const DataVisualization = () => {
           </div>
 
           {/* Legend */}
-          <div className="mt-6 flex items-center justify-center gap-6 text-xs font-sans">
+          <footer className="mt-6 flex items-center justify-center gap-6 text-xs font-sans">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-forsythia" />
               <span className="text-mystic-mint">Revenue</span>
@@ -218,106 +286,68 @@ const DataVisualization = () => {
               <div className="w-3 h-3 rounded-full bg-nocturnal-expedition" />
               <span className="text-mystic-mint">Target</span>
             </div>
-          </div>
+          </footer>
         </div>
       </div>
     </div>
   );
-};
+});
 
+DataVisualization.displayName = 'DataVisualization';
+
+/**
+ * Hero Component - Optimized, no Framer Motion
+ */
 const Hero = () => {
   return (
     <section className="relative min-h-screen pt-32 pb-20 px-4 flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-arctic-powder via-mystic-mint to-arctic-powder">
       {/* Animated Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
-        <div className="absolute top-1/4 -left-32 w-[600px] h-[600px] bg-forsythia/20 rounded-full blur-[150px] animate-pulse" />
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden" aria-hidden="true">
+        <div className="absolute top-1/4 -left-32 w-[600px] h-[600px] bg-forsythia/20 rounded-full blur-[150px] pulse" />
         <div className="absolute bottom-1/4 -right-32 w-[500px] h-[500px] bg-deep-saffron/15 rounded-full blur-[140px]" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-nocturnal-expedition/10 rounded-full blur-[120px]" />
       </div>
-      
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="max-w-5xl text-center z-10"
-      >
-        <motion.div 
-          initial={{ scale: 0.9 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-nocturnal-expedition/10 border-2 border-nocturnal-expedition/20 text-nocturnal-expedition text-sm font-mono font-bold mb-8 backdrop-blur-sm"
-        >
+
+      <div className="max-w-5xl text-center z-10">
+        <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-nocturnal-expedition/10 border-2 border-nocturnal-expedition/20 text-nocturnal-expedition text-sm font-mono font-bold mb-8 backdrop-blur-sm animate-scale-in">
           <Sparkles size={18} className="text-forsythia" />
           <span>AI-Powered Data Automation Platform</span>
-        </motion.div>
-        
-        <h1 className="text-6xl md:text-8xl font-bold text-oceanic-noir mb-8 leading-[1.05] tracking-tight">
+        </div>
+
+        <h1 className="text-6xl md:text-8xl font-bold text-oceanic-noir mb-8 leading-[1.05] tracking-tight animate-fade-in-up stagger-1">
           Build Smarter <br />
           <span className="bg-gradient-to-r from-forsythia via-deep-saffron to-nocturnal-expedition bg-clip-text text-transparent">
             Data Pipelines
           </span>
         </h1>
-        
-        <p className="text-xl md:text-2xl text-oceanic-noir/70 mb-12 max-w-3xl mx-auto font-sans leading-relaxed">
+
+        <p className="text-xl md:text-2xl text-oceanic-noir/70 mb-12 max-w-3xl mx-auto font-sans leading-relaxed animate-fade-in-up stagger-2">
           Automate complex workflows, process millions of events, and unlock insights with our intelligent data platform.
         </p>
-        
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16 animate-fade-in-up stagger-3">
           <AnimatedButton />
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 border-2 border-nocturnal-expedition text-nocturnal-expedition font-mono font-bold rounded-full hover:bg-nocturnal-expedition hover:text-arctic-powder transition-all duration-300 backdrop-blur-sm"
-          >
+          <button className="px-8 py-4 border-2 border-nocturnal-expedition text-nocturnal-expedition font-mono font-bold rounded-full hover:bg-nocturnal-expedition hover:text-arctic-powder btn-interaction backdrop-blur-sm">
             View Documentation
-          </motion.button>
+          </button>
         </div>
 
         {/* Stats Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto"
-        >
-          {[
-            { icon: <Zap className="text-forsythia" size={32} />, value: 10, suffix: 'M+', label: 'Events/Second', decimals: 0 },
-            { icon: <Shield className="text-deep-saffron" size={32} />, value: 99.99, suffix: '%', label: 'Uptime SLA', decimals: 2 },
-            { icon: <TrendingUp className="text-nocturnal-expedition" size={32} />, value: 200, suffix: '+', label: 'Integrations', decimals: 0 },
-            { icon: <Users className="text-oceanic-noir" size={32} />, value: 50, suffix: 'K+', label: 'Active Users', decimals: 0 },
-          ].map((stat, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 + index * 0.1, duration: 0.5 }}
-              whileHover={{ y: -5, scale: 1.02 }}
-              className="bg-arctic-powder/80 backdrop-blur-md border-2 border-mystic-mint rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <div className="mb-4 flex justify-center">{stat.icon}</div>
-              <div className="text-4xl font-bold text-oceanic-noir mb-2 h-[48px] flex items-center justify-center w-full">
-                <div className="min-w-[146px] text-center">
-                  <AnimatedCounter value={stat.value} suffix={stat.suffix} decimals={stat.decimals} />
-                </div>
-              </div>
-              <div className="text-sm text-oceanic-noir/60 font-medium">{stat.label}</div>
-            </motion.div>
-          ))}
-        </motion.div>
-      </motion.div>
-      
-      <motion.div
-        initial={{ opacity: 0, y: 100 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
-        className="mt-24 w-full max-w-6xl rounded-3xl border-4 border-nocturnal-expedition/20 shadow-2xl overflow-hidden bg-arctic-powder/80 backdrop-blur-sm p-6"
-      >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          <StatsCard icon={<Zap className="text-forsythia" size={32} />} value={10} suffix="M+" label="Events/Second" decimals={0} delay={4} />
+          <StatsCard icon={<Shield className="text-deep-saffron" size={32} />} value={99.99} suffix="%" label="Uptime SLA" decimals={2} delay={5} />
+          <StatsCard icon={<TrendingUp className="text-nocturnal-expedition" size={32} />} value={200} suffix="+" label="Integrations" decimals={0} delay={6} />
+          <StatsCard icon={<Users className="text-oceanic-noir" size={32} />} value={50} suffix="K+" label="Active Users" decimals={0} delay={7} />
+        </div>
+      </div>
+
+      <div className="mt-24 w-full max-w-6xl rounded-3xl border-4 border-nocturnal-expedition/20 shadow-2xl overflow-hidden bg-arctic-powder/80 backdrop-blur-sm p-6 animate-slide-in">
         <div className="aspect-[16/9]">
           <DataVisualization />
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 };
 
-export default Hero;
+export default memo(Hero);

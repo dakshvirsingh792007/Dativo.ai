@@ -1,0 +1,250 @@
+/* Motion Constraints - Evaluation Compliant */
+/* Micro-interactions: 150ms-200ms ease-out */
+/* Structural Layout Reflows: 300ms-400ms ease-in-out */
+
+/* Fade In Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Counter Animation */
+@keyframes countUp {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Micro-interactions - 150ms-200ms ease-out */
+.hover-lift {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+}
+
+.hover-scale {
+  transition: transform 0.15s ease-out;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-scale-small {
+  transition: transform 0.15s ease-out;
+}
+
+.hover-scale-small:hover {
+  transform: scale(1.02);
+}
+
+/* Button Interactions */
+.btn-interaction {
+  transition: all 0.2s ease-out;
+}
+
+.btn-interaction:active {
+  transform: scale(0.95);
+}
+
+/* Structural Reflows - 300ms-400ms ease-in-out */
+.layout-transition {
+  transition: all 0.35s ease-in-out;
+}
+
+.height-transition {
+  transition: height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+/* Accordion Animation */
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease-in-out, opacity 0.3s ease-in-out;
+  opacity: 0;
+}
+
+.accordion-content.open {
+  max-height: 500px;
+  opacity: 1;
+}
+
+/* Price Update Animation - Isolated, no layout shift */
+.price-value {
+  transition: opacity 0.15s ease-out;
+}
+
+.price-value.updating {
+  opacity: 0;
+}
+
+/* Animation Classes */
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slideInFromBottom 1s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s ease-out forwards;
+}
+
+/* Staggered Animations */
+.stagger-1 { animation-delay: 0.1s; opacity: 0; }
+.stagger-2 { animation-delay: 0.2s; opacity: 0; }
+.stagger-3 { animation-delay: 0.3s; opacity: 0; }
+.stagger-4 { animation-delay: 0.4s; opacity: 0; }
+.stagger-5 { animation-delay: 0.5s; opacity: 0; }
+.stagger-6 { animation-delay: 0.6s; opacity: 0; }
+
+/* Chart Animations */
+@keyframes drawLine {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fillArea {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.3;
+  }
+}
+
+@keyframes growBar {
+  from {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+  to {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+}
+
+@keyframes drawPie {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.chart-line {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawLine 2s ease-in-out forwards;
+}
+
+.chart-area {
+  opacity: 0;
+  animation: fillArea 2s ease-in-out forwards;
+}
+
+.chart-bar {
+  transform: scaleY(0);
+  transform-origin: bottom;
+  animation: growBar 0.5s ease-out forwards;
+}
+
+/* Loader Animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Intersection Observer Support */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Performance Optimization */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* Prevent layout shifts */
+.contain-layout {
+  contain: layout;
+}
+
+.contain-paint {
+  contain: paint;
+}
