@@ -97,7 +97,7 @@ const Hero = () => {
             >
               <div className="mb-4 flex justify-center">{stat.icon}</div>
               <div className="text-4xl font-bold text-oceanic-noir mb-2 h-[48px] flex items-center justify-center w-full">
-                <div className="min-w-[140px] text-center">
+                <div className="min-w-[142px] text-center">
                   <AnimatedCounter value={stat.value} suffix={stat.suffix} decimals={stat.decimals} />
                 </div>
               </div>
