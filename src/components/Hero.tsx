@@ -96,7 +96,7 @@ const Hero = () => {
               className="bg-arctic-powder/80 backdrop-blur-md border-2 border-mystic-mint rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <div className="mb-4 flex justify-center">{stat.icon}</div>
-              <div className="text-4xl font-bold text-oceanic-noir mb-2">
+              <div className="text-4xl font-bold text-oceanic-noir mb-2 font-mono min-h-[48px] flex items-center justify-center">
                 <AnimatedCounter value={stat.value} suffix={stat.suffix} decimals={stat.decimals} />
               </div>
               <div className="text-sm text-oceanic-noir/60 font-medium">{stat.label}</div>
