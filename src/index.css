@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-arctic-powder text-oceanic-noir font-sans;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-mono;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 bg-nocturnal-expedition text-arctic-powder font-mono font-bold rounded-lg hover:bg-oceanic-noir transition-colors duration-300;
+  }
+  
+  .glass-pill {
+    @apply backdrop-blur-md bg-white/30 border border-white/20 rounded-full shadow-lg;
+  }
+}
